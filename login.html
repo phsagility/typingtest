@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Typing Test – Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <h1 class="app-title">Typing Test</h1>
+      <div class="app-sub">Created by: Richiel Caña</div>
+      <form id="loginForm" autocomplete="off" class="login-form">
+        <div class="form-row">
+          <label for="fullName" class="form-label">FULL NAME:</label>
+          <input id="fullName" class="form-input" type="text" placeholder="" />
+        </div>
+        <div class="form-row">
+          <label for="testDate" class="form-label">DATE:</label>
+          <input id="testDate" class="form-input" type="date" />
+        </div>
+        <button id="startTestBtn" type="button" class="primary-btn">Start Typing Test</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    document.getElementById('startTestBtn').addEventListener('click', function(){
+      const name = document.getElementById('fullName').value.trim();
+      const date = document.getElementById('testDate').value;
+      if(!name || !date){ return; }
+      localStorage.setItem('fullName', name);
+      localStorage.setItem('date', date);
+      window.location.href = 'app.html';
+    });
+    // allow Enter key
+    document.getElementById('loginForm').addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); document.getElementById('startTestBtn').click(); }
+    });
+  </script>
+</body>
+</html>
