@@ -1,5 +1,5 @@
 
-// Typing Test – Easier WPM (light) + restrict editing to last two words
+// Typing Test – MEDIUM: char-based WPM (no boost) + last-two-words edit + next-word blocker
 let startTime, timerInterval, testCompleted = false; let typedTextRaw = '';
 const displayTextEl = document.getElementById('displayText');
 const displayText = displayTextEl.innerText;
@@ -49,14 +49,12 @@ function renderDisplayFollowingCaret(){ const pos = typingInput.selectionStart ?
 function calculateStats(){
   if(!startTime){ wpmEl.textContent='0'; accuracyEl.textContent='0%'; return; }
   const minutes=(Date.now()-startTime)/60000;
-  // Character-based WPM (standard) + light boost
-  const grossWPM = minutes>0 ? Math.round((typedTextRaw.length / 5) / minutes) : 0;
+  // MEDIUM: character-based WPM with NO boost
+  const wpm = minutes>0 ? Math.round((typedTextRaw.length / 5) / minutes) : 0;
   let correct=0; const len=Math.min(typedTextRaw.length, displayText.length);
   for(let i=0;i<len;i++) if(typedTextRaw[i]===displayText[i]) correct++;
   const acc = displayText.length?Math.round((correct/displayText.length)*100):0;
-  const boostFactor = 1.08; // +8% (light)
-  const boostedWPM = Math.round(grossWPM * boostFactor);
-  wpmEl.textContent = String(boostedWPM);
+  wpmEl.textContent = String(wpm);
   accuracyEl.textContent = String(acc);
 }
 
@@ -83,28 +81,26 @@ function escapeHtml(str){ return str.replace(/[&<>"']/g, (c)=>({'&':'&','<':'<',
 // Initialize history for current applicant on load
 window.addEventListener('DOMContentLoaded', loadHistoryForCurrentApplicant);
 
-// === RULE 1: Can't go to next word until current word is correct ===
+// RULE: Can't go to next word until current word is correct
 typingInput.addEventListener('keydown', (e) => {
   if (testCompleted) return;
   const isWordAdvance = (e.key === ' ' || e.key === 'Enter');
-  if (!isWordAdvance) return; // only enforce at word boundaries
+  if (!isWordAdvance) return; // enforce only at word boundaries
   const current = typingInput.value;
   const pos = typingInput.selectionStart;
-  // typed prefix must match passage up to caret
   if (current.slice(0,pos) !== displayText.slice(0,pos)) { e.preventDefault(); return; }
   const expectedNextChar = displayText[pos] || '';
   const nextChar = (e.key === 'Enter') ? '\n' : ' ';
   if (expectedNextChar !== nextChar) { e.preventDefault(); return; }
 });
 
-// === RULE 2: After typing correctly, you cannot edit older text; only last TWO words are editable ===
+// RULE: Only last TWO words are editable
 function getAllowedMinPos(){
   const pos = typingInput.selectionStart;
   const idx = findWordIndexAtPos(pos);
   const allowedIdx = Math.max(0, idx-1); // allow current + previous word only
   return wordBounds[allowedIdx]?.start ?? 0;
 }
-
 function enforceCaretMin(){
   const min = getAllowedMinPos();
   const s = typingInput.selectionStart; const e = typingInput.selectionEnd;
@@ -114,7 +110,6 @@ function enforceCaretMin(){
     typingInput.setSelectionRange(newStart, newEnd);
   }
 }
-
 // prevent moving caret before allowed window with nav keys
 typingInput.addEventListener('keydown', (e) => {
   const navKeys = new Set(['Backspace','ArrowLeft','Home']);
