@@ -1,5 +1,5 @@
 
-// Typing Test – MEDIUM: char-based WPM (no boost) + last-two-words edit + next-word blocker
+// Typing Test – SLIGHTLY HARDER MEDIUM: net WPM + last-two-words edit + next-word blocker
 let startTime, timerInterval, testCompleted = false; let typedTextRaw = '';
 const displayTextEl = document.getElementById('displayText');
 const displayText = displayTextEl.innerText;
@@ -49,12 +49,18 @@ function renderDisplayFollowingCaret(){ const pos = typingInput.selectionStart ?
 function calculateStats(){
   if(!startTime){ wpmEl.textContent='0'; accuracyEl.textContent='0%'; return; }
   const minutes=(Date.now()-startTime)/60000;
-  // MEDIUM: character-based WPM with NO boost
-  const wpm = minutes>0 ? Math.round((typedTextRaw.length / 5) / minutes) : 0;
-  let correct=0; const len=Math.min(typedTextRaw.length, displayText.length);
-  for(let i=0;i<len;i++) if(typedTextRaw[i]===displayText[i]) correct++;
+  // Gross WPM by characters
+  const grossWPM = minutes>0 ? (typedTextRaw.length / 5) / minutes : 0;
+  // Error count: number of incorrect characters in the typed portion
+  let errors=0; const len=Math.min(typedTextRaw.length, displayText.length);
+  let correct=0;
+  for(let i=0;i<len;i++) {
+    if(typedTextRaw[i]===displayText[i]) correct++; else errors++;
+  }
+  // Net WPM = gross - errors per minute (standard typing scoring)
+  const netWPM = Math.max(0, Math.round(grossWPM - (errors / minutes || 0)));
   const acc = displayText.length?Math.round((correct/displayText.length)*100):0;
-  wpmEl.textContent = String(wpm);
+  wpmEl.textContent = String(netWPM);
   accuracyEl.textContent = String(acc);
 }
 
